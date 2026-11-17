@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_bg">#C42A10</color>
+    <style name="Theme.ABPS" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">#1A1918</item>
+        <item name="android:windowBackground">@android:color/white</item>
+    </style>
+</resources>
