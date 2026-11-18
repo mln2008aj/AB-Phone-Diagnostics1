@@ -1,26 +1,103 @@
-name: Android CI
+name: Build AB's Phone Solutions
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
-  build:
-
+  android-app:
+    name: Android app (.apk)
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: set up JDK 11
-      uses: actions/setup-java@v4
-      with:
-        java-version: '11'
-        distribution: 'temurin'
-        cache: gradle
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Build
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug
+          cp app/build/outputs/apk/debug/app-debug.apk ../ABPhoneSolutions.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ABPhoneSolutions-Android
+      name: Build AB's Phone Solutions
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - name: Build with Gradle
-      run: ./gradlew build
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  android-app:
+    name: Android app (.apk)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Build
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug
+          cp app/build/outputs/apk/debug/app-debug.apk ../ABPhoneSolutions.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ABPhoneSolutions-Android
+          path: ABPhoneSolutions.apk
+
+  pc-tests:
+    name: PC program tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python pc/test_pc.py
+
+  windows-program:
+    name: Windows program (.exe)
+    runs-on: windows-latest
+    needs: pc-tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyinstaller==6.10.0
+      - run: pyinstaller --onefile --console --name ABPhoneSolutions-PC pc/abps_pc.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ABPhoneSolutions-Windows
+          path: dist/ABPhoneSolutions-PC.exe    path: ABPhoneSolutions.apk
+
+  pc-tests:
+    name: PC program tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python pc/test_pc.py
+
+  windows-program:
+    name: Windows program (.exe)
+    runs-on: windows-latest
+    needs: pc-tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pyinstaller==6.10.0
+      - run: pyinstaller --onefile --console --name ABPhoneSolutions-PC pc/abps_pc.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ABPhoneSolutions-Windows
+          path: dist/ABPhoneSolutions-PC.exe
